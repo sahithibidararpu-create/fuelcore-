@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const pumps_controller_1 = require("./pumps.controller");
+const auth_1 = require("../../middleware/auth");
+const rbac_1 = require("../../middleware/rbac");
+const validate_1 = require("../../middleware/validate");
+const pumps_schemas_1 = require("./pumps.schemas");
+const audit_1 = require("../../middleware/audit");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticate);
+router.use(rbac_1.requireStationAccess);
+router.get('/', (0, validate_1.validate)(pumps_schemas_1.pumpQuerySchema, 'query'), pumps_controller_1.pumpsController.getAll.bind(pumps_controller_1.pumpsController));
+router.get('/status', pumps_controller_1.pumpsController.getStatusSummary.bind(pumps_controller_1.pumpsController));
+router.get('/:id', pumps_controller_1.pumpsController.getById.bind(pumps_controller_1.pumpsController));
+router.get('/:id/meter-history', pumps_controller_1.pumpsController.getMeterHistory.bind(pumps_controller_1.pumpsController));
+router.post('/', (0, rbac_1.requireRole)('SUPER_ADMIN', 'STATION_MANAGER'), (0, validate_1.validate)(pumps_schemas_1.createPumpSchema), (0, audit_1.auditLog)('CREATE', 'Pump'), pumps_controller_1.pumpsController.create.bind(pumps_controller_1.pumpsController));
+router.patch('/:id', (0, rbac_1.requireRole)('SUPER_ADMIN', 'STATION_MANAGER'), (0, validate_1.validate)(pumps_schemas_1.updatePumpSchema), (0, audit_1.auditLog)('UPDATE', 'Pump'), pumps_controller_1.pumpsController.update.bind(pumps_controller_1.pumpsController));
+router.delete('/:id', (0, rbac_1.requireRole)('SUPER_ADMIN', 'STATION_MANAGER'), (0, audit_1.auditLog)('DELETE', 'Pump'), pumps_controller_1.pumpsController.delete.bind(pumps_controller_1.pumpsController));
+exports.default = router;
+//# sourceMappingURL=pumps.router.js.map
